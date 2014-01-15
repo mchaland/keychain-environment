@@ -6,10 +6,11 @@
 ;; Heavy Patches from: Michael "cofi" Markert <markert dot michael at googlemail dot com>
 ;;                     Jonas Bernoulli <jonas at emacsmirror dot org>
 ;;                     Philip Hudson <phil dot hudson at iname dot com>
-;; Keywords: keychain, ssh, gpg, agent
+;;                     Marc Chaland <git at marc-chaland dot net>
+;; Keywords: keychain, ssh, gpg, agent, gnome-keyring
 ;; Created: 18 Dec 2008
 
-;; Version: 1.1.0
+;; Version: 1.2.0
 
 ;; This file is not part of GNU Emacs.
 
@@ -59,6 +60,13 @@
 ;;
 ;;   M-x customize-group
 ;;   keychain
+;;
+;; Note: if you want to use with gnome keyring, customize as follow:
+;;  '(keychain-dir "/home/mchaland/.ssh")
+;;  '(keychain-gpg-file "/home/mchaland/.ssh/agent")
+;;  '(keychain-host "agent")
+;;  '(keychain-ssh-file "/home/mchaland/.ssh/agent")
+
 
 ;;; History:
 ;; 2008-12-18 Initial development.
@@ -66,6 +74,7 @@
 ;; 2010-07-27 Added GPG_AGENT support
 ;;            (by Michael Markert: markert dot michael at googlemail dot com)
 ;; 2011-08-10 Rolled several patches together
+;; 2014-01-15 Compatibity with gnome-keyring
 
 ;;; Code: 
 
@@ -136,17 +145,17 @@ and GPG_AGENT variables into the environment and returns them as a list."
     (unless (string= "" ssh-data)
       (setq ssh-auth-sock
             (progn
-              (string-match "SSH_AUTH_SOCK=\\(.*?\\);" ssh-data)
+              (string-match "^SSH_AUTH_SOCK=\\(.*?\\);?" ssh-data)
               (match-string 1 ssh-data)))
       (setq ssh-auth-pid
             (progn
-              (string-match "SSH_AGENT_PID=\\([0-9]*\\)?;" ssh-data)
+              (string-match "^SSH_AGENT_PID=\\([0-9]*\\)?;?" ssh-data)
               (match-string 1 ssh-data))))
     
     (unless (string= "" gpg-data)
       (setq gpg-agent-info
             (progn
-              (string-match "GPG_AGENT_INFO=\\(.*?\\);" gpg-data)
+              (string-match "^GPG_AGENT_INFO=\\(.*?\\);?" gpg-data)
               (match-string 1 gpg-data))))
     
     (unless (string= "" ssh-auth-sock)
